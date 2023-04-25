@@ -66,14 +66,13 @@ export default function Students() {
     queryClient.cancelQueries({ queryKey: ['students', page] })
   }
 
-  const totalStudentCount = Number(studentsQuery.data?.headers['x-total-count'] || 0)
+  const totalStudentCount = Number(studentsQuery.data?.headers['x-total-count'])
   const totalPage = Math.ceil(totalStudentCount / LIMIT)
-  console.log(totalPage)
 
   return (
     <div>
       <h1 className='text-lg'>Students</h1>
-      {/* <div>
+      <div>
         <button className='mt-6 rounded bg-blue-500 px-5 py-2 text-white' onClick={() => fetchStudent(10)}>
           Click 10s
         </button>
@@ -82,8 +81,8 @@ export default function Students() {
         <button className='mt-6 rounded bg-blue-500 px-5 py-2 text-white' onClick={() => fetchStudent(2)}>
           Click 2s
         </button>
-      </div> */}
-      {/* <div>
+      </div>
+      <div>
         <button className='mt-6 rounded bg-pink-700 px-5 py-2 text-white' onClick={refetchStudents}>
           Refetch Students
         </button>
@@ -92,7 +91,7 @@ export default function Students() {
         <button className='mt-6 rounded bg-pink-700 px-5 py-2 text-white' onClick={cancelRequestStudents}>
           Cancel Request Students
         </button>
-      </div> */}
+      </div>
       <div className='mt-3'>
         <Link
           to='/students/add'
@@ -175,7 +174,7 @@ export default function Students() {
           <div className='mt-6 flex justify-center'>
             <nav aria-label='Page navigation example'>
               <ul className='inline-flex -space-x-px'>
-                <li>
+                {/* <li>
                   {page === 1 ? (
                     <span className='cursor-not-allowed rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 '>
                       Previous
@@ -188,7 +187,7 @@ export default function Students() {
                       Previous
                     </Link>
                   )}
-                </li>
+                </li> */}
 
                 {Array(totalPage)
                   .fill(0)

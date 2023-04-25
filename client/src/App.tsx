@@ -1,3 +1,5 @@
+import { useIsFetching, useIsMutating } from '@tanstack/react-query'
+import Spinner from 'components/Spinner'
 import MainLayout from 'layouts/MainLayout'
 import About from 'pages/About'
 import AddStudent from 'pages/AddStudent'
@@ -34,8 +36,12 @@ function App() {
     }
   ])
 
+  const isFetching = useIsFetching()
+  const isMutating = useIsMutating()
+
   return (
     <div className='App'>
+      {isFetching + isMutating !== 0 && <Spinner />}
       <MainLayout>{elements}</MainLayout>
     </div>
   )
