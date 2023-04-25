@@ -1,11 +1,4 @@
 # React Query
-
-## Giới thiệu series React Query
-
-Series này sẽ khoản 10 video, xem hết series này bạn sẽ nắm vững được React Query và có thể tự tin xử lý mọi case thực tế
-
-- Video 1: React query là gì? setup dev tool, gọi query
-
 ## React Query là gì?
 
 TanStack Query (tên mới) hay React Query là thư viện giúp quản lý các state bất đồng bộ như data từ api.
@@ -23,12 +16,6 @@ Trả lời câu hỏi phổ biến:
 Tanstack Query dùng gì để gọi API?
 
 Tanstack Query không đảm nhận việc gọi API, việc gọi API sẽ thực hiện thông qua các thư viện bạn dùng như axios, fetch API. Còn Tanstack Query chỉ đảm nhận việc quản lý data và trigger khi cần thiết.
-
-## Lưu ý trước khi học
-
-React Query có cơ chế caching hơi khác một chút so với RTK Query, nên anh em đừng lấy logic của RTK Query rồi suy ngược lại React Query cũng giống vậy nhé.
-
-> Anh em hãy dành ra 1 phút để quên đi cách caching của RTK Query 😁
 
 ## Một số khái niệm quan trọng
 
@@ -112,3 +99,86 @@ function C() {
 - Trước khi `cacheTime` hết thì ông `C` comopnent được mount. cache data `['todos']` được trả về ngay lập tức cho `C` và `fetchTodos` sẽ chạy ngầm. Khi nó hoàn thành thì sẽ cập nhật lại cache với data mới.
 - Cuối cùng thì `C` unmount
 - Không còn ai subcribe đến cache data `['todos']` trong 5 phút tiếp theo nữa và cache data `['todos']` bị xóa hoàn toàn
+
+## Setup ReactQuery
+
+`npm i @tanstack/react-query`
+
+```ts
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { getTodos, postTodo } from '../my-api'
+
+// Create a client
+const queryClient = new QueryClient()
+
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Todos />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  )
+}
+
+function Todos() {
+  // Access the client
+  const queryClient = useQueryClient()
+
+  // Queries
+  const query = useQuery({ 
+    queryKey: ['todos'], 
+    queryFn: getTodos,
+    refetchOnMount: true, // khi component được mount, query sẽ tự động refetch một lần
+    refetchOnWindowFocus: false, // fetch api sau khi chuyển tab khác và trở lại tab này
+    refetchOnReconnect: true, // fetch api sau khi khôi phục internet
+    refetchInterval: 1000 * 60 * 60, // fetch api after 60 minute
+  })
+
+  // Mutations
+  const mutation = useMutation({
+    mutationFn: postTodo,
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['todos'] })
+    },
+  })
+
+  return (
+    <div>
+      <ul>
+        {query.data?.map((todo) => (
+          <li key={todo.id}>{todo.title}</li>
+        ))}
+      </ul>
+
+      <button
+        onClick={() => {
+          mutation.mutate({
+            id: Date.now(),
+            title: 'Do Laundry',
+          })
+        }}
+      >
+        Add Todo
+      </button>
+    </div>
+  )
+}
+
+render(<App />, document.getElementById('root'))
+```
+
+- `refetchOnMount`: xác định liệu một query có nên được fetch lại ngay khi component chứa nó được render lần đầu tiên hay không. Nếu tùy chọn này được đặt là true, thì khi component được mount, query sẽ tự động refetch một lần, giúp cập nhật dữ liệu mới nhất từ server. Default refetchOnMount là true.
+
+-  `refetchOnWindowFocus`: xác định liệu một query có nên được fetch lại tự động khi cửa sổ trình duyệt được focus lại sau khi mất focus hay không. Khi tùy chọn này được đặt là true, nếu cửa sổ trình duyệt đã mất focus và được focus lại, query sẽ tự động refetch một lần để cập nhật dữ liệu mới nhất từ server. Default refetchOnWindowFocus là true.
+
+-  `refetchOnReconnect`: xác định liệu một query có nên được fetch lại tự động khi một kết nối mạng bị ngắt và sau đó được khôi phục lại hay không. Khi tùy chọn này được đặt là true, nếu một kết nối mạng bị ngắt và sau đó được khôi phục lại, query sẽ tự động refetch một lần để cập nhật dữ liệu mới nhất từ server. Default refetchOnReconnect là true.
+
+- `refetchInterval` : xác định chu kỳ thời gian để tự động fetch lại dữ liệu của một query. Khi tùy chọn này được cấu hình, query sẽ được tự động fetch lại dữ liệu sau mỗi chu kỳ thời gian được xác định. Ví dụ, nếu refetchInterval được đặt là 10000 (tương đương với 10 giây), thì query sẽ được tự động refetch lại sau mỗi 10 giây. Default refetchInterval là false, tức là không có tự động refetch.
